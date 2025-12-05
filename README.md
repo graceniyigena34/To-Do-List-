@@ -69,3 +69,12 @@ Closing or refreshing the browser does NOT delete your tasks.
 🔍 (Optional) Search & Filtering
 
 Use the search bar or filters (if implemented) to organize your tasks.
+
+The image of this to do list 
+The home page 
+
+![alt text](<Home page.png>)
+
+And when you click on dark mode you get this 
+
+![alt text](<darkmode changes.png>)
