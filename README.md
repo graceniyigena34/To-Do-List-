@@ -41,3 +41,5 @@ Open the project
 Double-click index.html
 
 OR run using Live Server in VS Code
+
+This is the link of github: https://github.com/graceniyigena34/To-Do-List-
