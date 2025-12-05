@@ -13,3 +13,15 @@ Mark Complete/Incomplete — Toggle task status with clear visual indicators.
 Delete Tasks — Remove tasks instantly without reloading the page.
 
 LocalStorage Persistence — Tasks remain saved even after closing the browser.
+
+## Advanced Features 
+
+Inline Task Editing — Edit tasks directly in place.
+
+Task Categories — Organize tasks (Work, Personal, School, etc.).
+
+Dark Mode Toggle — Switch between light and dark themes.
+
+Priority Levels — Add High / Medium / Low labeling with visual cues.
+
+Search & Filtering — Find tasks by name, status, category, or priority.
