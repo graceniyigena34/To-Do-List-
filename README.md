@@ -25,3 +25,19 @@ Dark Mode Toggle — Switch between light and dark themes.
 Priority Levels — Add High / Medium / Low labeling with visual cues.
 
 Search & Filtering — Find tasks by name, status, category, or priority.
+
+## Setup Instructions ( To Run the Project)
+
+Clone the repository
+
+git clone https://github.com/your-username/to-do-app.git
+
+Navigate into the project
+
+cd to-do-app
+
+Open the project
+
+Double-click index.html
+
+OR run using Live Server in VS Code
