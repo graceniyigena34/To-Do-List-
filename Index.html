@@ -3,60 +3,329 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>To-Do List </title>
+    <title>Professional To-Do List</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class'
+        }
+    </script>
 </head>
-<body class="bg-green-100 p-6">
-    
-    <div>
-        <h1 class="text-2xl font-bold mb-4 text-center">To-Do List</h1>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen transition-colors duration-300">
+    <div class="container mx-auto max-w-2xl p-6">
+        <!-- Header -->
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-2">To-Do List</h1>
+            <p class="text-gray-600 dark:text-gray-300">Stay organized and productive</p>
+        </header>
 
-         <!-- Input for adding tasks-->
+        <!-- Controls -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-6">
+            <!-- Dark Mode Toggle -->
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-semibold text-gray-800 dark:text-white">Task Manager</h2>
+                <button id="darkModeToggle" class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                    <span class="dark:hidden">🌙</span>
+                    <span class="hidden dark:inline">☀️</span>
+                </button>
+            </div>
 
-         <div class="flex gap-2 mb-4">
-            <input id="taskInput" type="text" placeholder="Enter a new task" class="flex-1 border rounded px-3 py-2 rounded hover:bg-yellow-400">
-            <button id="addTaskBtn" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add</button>
-         </div>
+            <!-- Add Task Form -->
+            <div class="space-y-4">
+                <div class="flex gap-2">
+                    <input id="taskInput" type="text" placeholder="Enter a new task..." 
+                           class="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <select id="categorySelect" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-white">
+                        <option value="personal">Personal</option>
+                        <option value="work">Work</option>
+                        <option value="school">School</option>
+                    </select>
+                    <select id="prioritySelect" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-white">
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                    <button id="addTaskBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors font-medium">
+                        Add
+                    </button>
+                </div>
 
-        <!--Task List-->
-        <ul id="taskzzzist" class="space-y-2"></ul>
+                <!-- Search and Filter -->
+                <div class="flex gap-2">
+                    <input id="searchInput" type="text" placeholder="Search tasks..." 
+                           class="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-white">
+                    <select id="filterCategory" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-white">
+                        <option value="all">All Categories</option>
+                        <option value="personal">Personal</option>
+                        <option value="work">Work</option>
+                        <option value="school">School</option>
+                    </select>
+                    <select id="filterStatus" class="border border-gray-300 dark:border-gray-600 rounded-lg px-3 py-2 bg-white dark:bg-gray-700 text-gray-800 dark:text-white">
+                        <option value="all">All Tasks</option>
+                        <option value="active">Active</option>
+                        <option value="completed">Completed</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Statistics -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 mb-6">
+            <div class="flex justify-between text-sm text-gray-600 dark:text-gray-300">
+                <span>Total: <span id="totalTasks">0</span></span>
+                <span>Active: <span id="activeTasks">0</span></span>
+                <span>Completed: <span id="completedTasks">0</span></span>
+            </div>
+        </div>
+
+        <!-- Task List -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">Your Tasks</h3>
+            </div>
+            <ul id="taskList" class="divide-y divide-gray-200 dark:divide-gray-700">
+                <!-- Tasks will be dynamically added here -->
+            </ul>
+            <div id="emptyState" class="p-8 text-center text-gray-500 dark:text-gray-400 hidden">
+                <p class="text-lg mb-2">📝</p>
+                <p>No tasks yet. Add one above to get started!</p>
+            </div>
+        </div>
     </div>
 
     <script>
-        const taskInput = document.getElementById('taskInput');
-        const addtaskInput = document.getElementById('addtaskBtn');
-        const taskList = document.getElementById('taskList');
+        class TodoApp {
+            constructor() {
+                this.tasks = JSON.parse(localStorage.getItem('todoTasks')) || [];
+                this.currentEditId = null;
+                this.initializeElements();
+                this.bindEvents();
+                this.loadTheme();
+                this.renderTasks();
+                this.updateStats();
+            }
 
-        // Function to add a task
-    function addTask() {
-        const taskText = taskInput.value.trim();
-        if (taskText === '') return;
+            initializeElements() {
+                this.taskInput = document.getElementById('taskInput');
+                this.addTaskBtn = document.getElementById('addTaskBtn');
+                this.taskList = document.getElementById('taskList');
+                this.searchInput = document.getElementById('searchInput');
+                this.filterCategory = document.getElementById('filterCategory');
+                this.filterStatus = document.getElementById('filterStatus');
+                this.categorySelect = document.getElementById('categorySelect');
+                this.prioritySelect = document.getElementById('prioritySelect');
+                this.darkModeToggle = document.getElementById('darkModeToggle');
+                this.emptyState = document.getElementById('emptyState');
+                this.totalTasks = document.getElementById('totalTasks');
+                this.activeTasks = document.getElementById('activeTasks');
+                this.completedTasks = document.getElementById('completedTasks');
+            }
 
-    }
+            bindEvents() {
+                this.addTaskBtn.addEventListener('click', () => this.addTask());
+                this.taskInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.addTask();
+                });
+                this.searchInput.addEventListener('input', () => this.renderTasks());
+                this.filterCategory.addEventListener('change', () => this.renderTasks());
+                this.filterStatus.addEventListener('change', () => this.renderTasks());
+                this.darkModeToggle.addEventListener('click', () => this.toggleDarkMode());
+            }
 
+            addTask() {
+                const text = this.taskInput.value.trim();
+                if (!text) return;
 
-    // Create list item 
-    const li = document.createElement('li');
-    li.textContent = taskText;
-    li.className = "bg-red-100 px-3 py-2 rounded shadow hover:bg-red-200";
+                const task = {
+                    id: Date.now(),
+                    text: text,
+                    completed: false,
+                    category: this.categorySelect.value,
+                    priority: this.prioritySelect.value,
+                    createdAt: new Date().toISOString()
+                };
 
-    // Append to task list 
-    taskList.appendChild(li);
+                this.tasks.unshift(task);
+                this.saveTasks();
+                this.renderTasks();
+                this.updateStats();
+                this.taskInput.value = '';
+                this.taskInput.focus();
+            }
 
-    // Clear input 
-    taskInput.value = '';
-    taskInput.focus();
-    
-    // Add task on button click
-    addTaskBtn.addEventListener('click',addTask);
+            deleteTask(id) {
+                this.tasks = this.tasks.filter(task => task.id !== id);
+                this.saveTasks();
+                this.renderTasks();
+                this.updateStats();
+            }
 
-    // Add task on Enter key
-    taskInput.addEventListener('keypress', function(e) {
-       if (e.key === 'Enter') addTask();
-    });
+            toggleTask(id) {
+                const task = this.tasks.find(task => task.id === id);
+                if (task) {
+                    task.completed = !task.completed;
+                    this.saveTasks();
+                    this.renderTasks();
+                    this.updateStats();
+                }
+            }
 
+            editTask(id, newText) {
+                const task = this.tasks.find(task => task.id === id);
+                if (task && newText.trim()) {
+                    task.text = newText.trim();
+                    this.saveTasks();
+                    this.renderTasks();
+                }
+            }
+
+            getFilteredTasks() {
+                let filtered = this.tasks;
+
+                // Search filter
+                const searchTerm = this.searchInput.value.toLowerCase();
+                if (searchTerm) {
+                    filtered = filtered.filter(task => 
+                        task.text.toLowerCase().includes(searchTerm)
+                    );
+                }
+
+                // Category filter
+                const categoryFilter = this.filterCategory.value;
+                if (categoryFilter !== 'all') {
+                    filtered = filtered.filter(task => task.category === categoryFilter);
+                }
+
+                // Status filter
+                const statusFilter = this.filterStatus.value;
+                if (statusFilter === 'active') {
+                    filtered = filtered.filter(task => !task.completed);
+                } else if (statusFilter === 'completed') {
+                    filtered = filtered.filter(task => task.completed);
+                }
+
+                return filtered;
+            }
+
+            renderTasks() {
+                const filteredTasks = this.getFilteredTasks();
+                
+                if (filteredTasks.length === 0) {
+                    this.taskList.innerHTML = '';
+                    this.emptyState.classList.remove('hidden');
+                    return;
+                }
+
+                this.emptyState.classList.add('hidden');
+                this.taskList.innerHTML = filteredTasks.map(task => this.createTaskHTML(task)).join('');
+            }
+
+            createTaskHTML(task) {
+                const priorityColors = {
+                    high: 'border-l-red-500 bg-red-50 dark:bg-red-900/20',
+                    medium: 'border-l-yellow-500 bg-yellow-50 dark:bg-yellow-900/20',
+                    low: 'border-l-green-500 bg-green-50 dark:bg-green-900/20'
+                };
+
+                const categoryIcons = {
+                    work: '💼',
+                    personal: '👤',
+                    school: '🎓'
+                };
+
+                return `
+                    <li class="p-4 border-l-4 ${priorityColors[task.priority]} hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" ${task.completed ? 'checked' : ''} 
+                                   onclick="app.toggleTask(${task.id})" 
+                                   class="w-5 h-5 text-blue-600 rounded focus:ring-blue-500">
+                            
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-lg">${categoryIcons[task.category]}</span>
+                                    <span class="text-xs px-2 py-1 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 capitalize">
+                                        ${task.category}
+                                    </span>
+                                    <span class="text-xs px-2 py-1 rounded-full ${task.priority === 'high' ? 'bg-red-200 text-red-800 dark:bg-red-800 dark:text-red-200' : task.priority === 'medium' ? 'bg-yellow-200 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-200' : 'bg-green-200 text-green-800 dark:bg-green-800 dark:text-green-200'} capitalize">
+                                        ${task.priority}
+                                    </span>
+                                </div>
+                                <p class="text-gray-800 dark:text-white ${task.completed ? 'line-through opacity-60' : ''} cursor-pointer" 
+                                   ondblclick="app.startEdit(${task.id}, this)">
+                                    ${task.text}
+                                </p>
+                            </div>
+                            
+                            <button onclick="app.deleteTask(${task.id})" 
+                                    class="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors">
+                                🗑️
+                            </button>
+                        </div>
+                    </li>
+                `;
+            }
+
+            startEdit(id, element) {
+                if (this.currentEditId) return;
+                
+                this.currentEditId = id;
+                const task = this.tasks.find(t => t.id === id);
+                const originalText = element.textContent;
+                
+                element.innerHTML = `<input type="text" value="${task.text}" class="w-full bg-transparent border-b border-blue-500 focus:outline-none text-gray-800 dark:text-white" onblur="app.finishEdit(${id}, this)" onkeypress="app.handleEditKeypress(event, ${id}, this)">`;
+                element.querySelector('input').focus();
+            }
+
+            finishEdit(id, input) {
+                if (this.currentEditId !== id) return;
+                
+                const newText = input.value.trim();
+                if (newText) {
+                    this.editTask(id, newText);
+                } else {
+                    this.renderTasks();
+                }
+                this.currentEditId = null;
+            }
+
+            handleEditKeypress(event, id, input) {
+                if (event.key === 'Enter') {
+                    input.blur();
+                } else if (event.key === 'Escape') {
+                    this.currentEditId = null;
+                    this.renderTasks();
+                }
+            }
+
+            updateStats() {
+                const total = this.tasks.length;
+                const completed = this.tasks.filter(task => task.completed).length;
+                const active = total - completed;
+
+                this.totalTasks.textContent = total;
+                this.activeTasks.textContent = active;
+                this.completedTasks.textContent = completed;
+            }
+
+            toggleDarkMode() {
+                document.documentElement.classList.toggle('dark');
+                localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+            }
+
+            loadTheme() {
+                const isDark = localStorage.getItem('darkMode') === 'true';
+                if (isDark) {
+                    document.documentElement.classList.add('dark');
+                }
+            }
+
+            saveTasks() {
+                localStorage.setItem('todoTasks', JSON.stringify(this.tasks));
+            }
+        }
+
+        // Initialize the app
+        const app = new TodoApp();
     </script>
-
-   
 </body>
 </html>
