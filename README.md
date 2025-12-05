@@ -1,3 +1,5 @@
+The deployed link using netlify: https://endearing-kheer-a9bc68.netlify.app/
+
 ## To-Do List Web Application
 
 A simple, interactive, and responsive To-Do List Web Application built using HTML5, Tailwind CSS, and JavaScript.
